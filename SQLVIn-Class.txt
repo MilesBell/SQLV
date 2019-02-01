@@ -1,0 +1,80 @@
+SELECT vend_id
+FROM Products;
+
+SELECT vend_id, prod_name
+FROM Products;
+
+SELECT vend_id, COUNT(*) AS num_vend_id
+FROM Products
+GROUP BY vend_id;
+
+SELECT vend_id, COUNT(*) AS num_vend_id
+FROM Products
+GROUP BY vend_id
+HAVING COUNT(*)>=3;
+
+--Subqueries
+
+SELECT order_num --show order numbers where product id is 'rgan01'
+FROM OrderItems
+WHERE prod_id='RGAN01';
+
+SELECT cust_id --show customer id where the order number is either 20007 or 20008
+FROM Orders
+WHERE order_num IN(20007, 20008);
+
+SELECT cust_id --show customer id from orders table, where for the shown order numbers, the product id is rgan01 (2 tables 1 query)
+FROM Orders 
+WHERE order_num IN( SELECT order_num
+					FROM OrderItems
+					WHERE prod_id='RGAN01');
+
+--get order number of product_id 'rgan01, which will help us get the order number that have customer id [filter based on multiple tables]
+
+SELECT cust_name, cust_contact --show customer name and contact, where the order number has a product id of 'rgan01';
+FROM Customers
+WHERE cust_id IN(SELECT cust_id	
+				FROM Orders
+				WHERE order_num IN(SELECT order_num
+									FROM OrderItems
+									WHERE prod_id='RGAN01'));
+
+--subqueries as calculated fields
+
+SELECT cust_name, cust_state, (SELECT COUNT(*) --show customer name and state, where the customer id from the orders table is equal to the customer id from the customers table (make as calculated field of their counts called 'orders) ordered by customer name 
+								FROM Orders
+								WHERE Orders.cust_id=Customers.cust_id) AS orders
+FROM Customers
+ORDER BY cust_name;
+
+--Practice
+
+SELECT prod_name
+FROM Products
+WHERE prod_id IN(SELECT prod_id
+FROM OrderItems
+WHERE NOT order_item IS NULL);
+
+SELECT cust_name, cust_country
+FROM Customers
+WHERE cust_id IN(SELECT cust_id
+FROM Orders
+WHERE datepart(yy,order_date)=2012);
+
+SELECT vend_name, vend_city, (SELECT COUNT(*)
+								FROM Products
+								WHERE Products.vend_id=Vendors.vend_id) AS Products
+FROM Vendors
+ORDER BY vend_name DESC;
+
+SELECT vend_name, vend_country,
+FROM Vendors WHERE vend_id IN(SELECT vend_id, COUNT(*)
+								FROM Products
+								WHERE prod_price<=10);
+
+
+
+
+
+
+
